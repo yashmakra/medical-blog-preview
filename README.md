@@ -1,4 +1,4 @@
-# Medical Insights — private medical blog preview
+# Blogs Review — private medical blog preview
 
 ## Website review and corrections
 
