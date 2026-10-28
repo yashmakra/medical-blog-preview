@@ -1,0 +1,4 @@
+import fs from 'node:fs';import path from 'node:path';
+const folder='.next/server/app/blogs';let pages=0,images=0;const errors=[];
+for(const file of fs.readdirSync(folder).filter(f=>f.endsWith('.html'))){const html=fs.readFileSync(path.join(folder,file),'utf8');pages++;const h1=(html.match(/<h1[\s>]/g)||[]).length;if(h1!==1)errors.push(`${file}: ${h1} H1 headings`);const sources=[...html.matchAll(/<img[^>]+src="([^"]+)"/g)].map(m=>m[1]);if(!sources.length)errors.push(`${file}: no rendered image`);for(const src of sources){if(src.startsWith('/blog-images/')){const p=path.join('public',decodeURIComponent(src));if(!fs.existsSync(p)||!fs.statSync(p).size)errors.push(`Missing ${src}`);else images++;}}}
+console.log(JSON.stringify({pages,renderedLocalImages:images,errors},null,2));if(pages!==60||errors.length)process.exit(1);

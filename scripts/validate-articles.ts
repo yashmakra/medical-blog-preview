@@ -1,0 +1,5 @@
+import fs from 'fs';import path from 'path';import {getArticles} from '../lib/articles';
+const articles=getArticles();const errors:string[]=[];const slugs=new Set<string>();let images=0;let placeholders=0;
+if(articles.length!==60)errors.push(`Expected 60 articles, found ${articles.length}`);
+for(const a of articles){if(!a.title)errors.push(`Missing title: ${a.id}`);if(slugs.has(a.slug))errors.push(`Duplicate slug: ${a.slug}`);slugs.add(a.slug);for(const m of a.content.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)){if(m[1].startsWith('/blog-images/')){const file=path.join('public',decodeURIComponent(m[1]));if(!fs.existsSync(file)||!fs.statSync(file).size)errors.push(`Missing image: ${file}`);else images++;}}placeholders+=(a.content.match(/\]\((?:CTA|PDF|INTERNAL_LINK)_URL\)/g)||[]).length;}
+const result={articles:articles.length,uniqueSlugs:slugs.size,images,unconfiguredEditorialLinks:placeholders,errors};console.log(JSON.stringify(result,null,2));fs.writeFileSync('VALIDATION_REPORT.json',JSON.stringify(result,null,2));if(errors.length)process.exit(1);
